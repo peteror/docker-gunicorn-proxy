@@ -6,7 +6,7 @@ RUN apt-get update && \
 
 ADD https://ssl-config.mozilla.org/ffdhe2048.txt /app/dhparam.pem
 WORKDIR /app
-EXPOSE 8000
+EXPOSE 8080
 
 COPY run.sh /
 ENTRYPOINT ["/run.sh"]
