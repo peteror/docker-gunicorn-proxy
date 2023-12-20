@@ -21,16 +21,19 @@ jobs:
           aws-region: me-south-1
 
       - name: Login to Amazon ECR
-        run: aws ecr get-login-password --region me-south-1 | docker login --username AWS --password-stdin 762440528617.dkr.ecr.me-south-1.amazonaws.com
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, tag, and push Docker image to Amazon ECR
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
         env:
           ECR_REGISTRY: 762440528617.dkr.ecr.me-south-1.amazonaws.com
           ECR_REPOSITORY: docker-gunicorn-proxy
-          IMAGE_TAG: $(date +%s)
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker buildx create --use
-          docker buildx build \
-            --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-            -- push \
-            .
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
