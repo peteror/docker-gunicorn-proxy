@@ -29,5 +29,8 @@ jobs:
           ECR_REPOSITORY: docker-gunicorn-proxy
           IMAGE_TAG: $(date +%s)
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker buildx create --use
+          docker buildx build \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+            -- push \
+            .
