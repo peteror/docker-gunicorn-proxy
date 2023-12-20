@@ -2,35 +2,34 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ['master']
   pull_request:
-    branches: [ "master" ]
+    branches: ['master']
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up AWS CLI
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: me-south-1
-    
-    - name: Login to Amazon ECR
-      run: aws ecr get-login-password --region me-south-1 | docker login --username AWS --password-stdin 762440528617.dkr.ecr.me-south-1.amazonaws.com
-    
-    - name: Build, tag, and push Docker image to Amazon ECR
-      env:
-        ECR_REGISTRY: 762440528617.dkr.ecr.me-south-1.amazonaws.com
-        ECR_REPOSITORY: docker-gunicorn-proxy
-        IMAGE_TAG: $(date +%s)
-      run: |
-        docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-        docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+      - uses: actions/checkout@v3
+
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: me-south-1
+
+      - name: Login to Amazon ECR
+        run: aws ecr get-login-password --region me-south-1 | docker login --username AWS --password-stdin 762440528617.dkr.ecr.me-south-1.amazonaws.com
+
+      - name: Build, tag, and push Docker image to Amazon ECR
+        env:
+          ECR_REGISTRY: 762440528617.dkr.ecr.me-south-1.amazonaws.com
+          ECR_REPOSITORY: docker-gunicorn-proxy
+          IMAGE_TAG: $(date +%s)
+        run: |
+          docker buildx build \
+          -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+          -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+          --push .
