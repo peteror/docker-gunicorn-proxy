@@ -66,7 +66,7 @@ if [ $SSL_KEY ]; then
   else
     PASSWORD_FILE=""
   fi
-	BIND="listen 8000 ssl http2;
+	BIND="listen 8080 ssl http2;
 	ssl_certificate $SSL_CRT;
 	ssl_certificate_key $SSL_KEY;
 	$PASSWORD_FILE
@@ -82,7 +82,7 @@ if [ $SSL_KEY ]; then
 	ssl_prefer_server_ciphers off;
 	"
 else
-	BIND="listen 8000;"
+	BIND="listen 8080;"
 fi
 
 cat <<EOF > /etc/nginx/nginx.conf
